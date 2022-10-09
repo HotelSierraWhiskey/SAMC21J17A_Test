@@ -8,7 +8,14 @@
     Page 137
 */
 
+
 #include "../samc21j17a.h"
+
+
+// Registers
+extern gclk_registers_t *gclk = (gclk_registers_t *)GCLK_BASE_ADDRESS;
+extern mclk_registers_t *mclk = (mclk_registers_t *)MCLK_BASE_ADDRESS;
+
 
 /*  
     GLCK_IO pin mappings
@@ -42,17 +49,24 @@
 */
 
 
-
 //  Basic operation macros
 
-#define clock_enable(n)             gclk_registers.GCLK_GENCTRL[n] |= GCLK_GENCTRL_GENEN(1)
-#define clock_disable(n)            gclk_registers.GCLK_GENCTRL[n] |= GCLK_GENCTRL_GENEN(0)
+#define clock_enable(n)                 gclk->GCLK_GENCTRL[n] |= GCLK_GENCTRL_GENEN(1)
+#define clock_disable(n)                gclk->GCLK_GENCTRL[n] |= GCLK_GENCTRL_GENEN(0)
 
-#define clock_output_enable(n)      gclk_registers.GCLK_GENCTRL[n] |= GCLK_GENCTRL_OE(1)
-#define clock_output_disable(n)     gclk_registers.GCLK_GENCTRL[n] |= GCLK_GENCTRL_OE(0)
+#define clock_mclk_enable()             clock_enable(0)
 
-#define set_clock_OOV_high()        gclk_registers.GCLK_GENCTRL[n] |= GCLK_GENCTRL_OOV(1)
-#define set_clock_OOV_low()         gclk_registers.GCLK_GENCTRL[n] |= GCLK_GENCTRL_OOV(0)
+#define clock_mclk_set_source(source)   gclk->GCLK_GENCTRL[0] |= source         // should be safer
+#define clock_mclk_set_div(n)           gclk->GCLK_GENCTRL[0] |= n              // should be safer
+
+#define clock_output_enable(n)          gclk->GCLK_GENCTRL[n] |= GCLK_GENCTRL_OE(1)
+#define clock_output_disable(n)         gclk->GCLK_GENCTRL[n] |= GCLK_GENCTRL_OE(0)
+
+#define set_clock_OOV_high()            gclk->GCLK_GENCTRL[n] |= GCLK_GENCTRL_OOV(1)
+#define set_clock_OOV_low()             gclk->GCLK_GENCTRL[n] |= GCLK_GENCTRL_OOV(0)
+
+#define clock_PORT_enable()             mclk->MCLK_APBBMASK |= MCLK_APBBMASK_PORT(1);		// The APBB clock for the PORT is enabled.
+
 
 //  SERCOM Core Clock utilities (PCHCTRL Peripheral Channel Control, Page: 151)
 //  The core clock is required to clock the SERCOM while working as a master. 
@@ -76,8 +90,8 @@ extern constexpr uint8_t get_sercom_peripheral_channel_index(uint8_t sercom) {
     }
 }
 
-#define enable_sercom_core_clock(sercom)  gclk_registers.GCLK_PCHCTRL[get_sercom_peripheral_channel_index(sercom)] |= GCLK_PCHCTRL_CHEN(1) 
-#define disable_sercom_core_clock(sercom) gclk_registers.GCLK_PCHCTRL[get_sercom_peripheral_channel_index(sercom)] |= GCLK_PCHCTRL_CHEN(0)
+#define enable_sercom_core_clock(sercom)  gclk->GCLK_PCHCTRL[get_sercom_peripheral_channel_index(sercom)] |= GCLK_PCHCTRL_CHEN(1) 
+#define disable_sercom_core_clock(sercom) gclk->GCLK_PCHCTRL[get_sercom_peripheral_channel_index(sercom)] |= GCLK_PCHCTRL_CHEN(0)
 
 //  SERCOM Bus Clock utilities (MCLK Main Clock Controller, Page: 154)
 //  The SERCOM bus clock (CLK_SERCOMx_APB) can be enabled and disabled in the Main Clock Controller.
@@ -94,13 +108,8 @@ extern constexpr uint8_t get_sercom_APB_bit(uint8_t sercom, uint8_t value) {
     }
 }
 
-#define enable_sercom_bus_clock(sercom) mclk_registers.MCLK_APBCMASK |= get_sercom_APB_bit(sercom, 1)
-#define disable_sercom_bus_clock(sercom) mclk_registers.MCLK_APBCMASK |= get_sercom_APB_bit(sercom, 0)
-
-
-extern gclk_registers_t gclk_registers;
-
-extern mclk_registers_t mclk_registers;
+#define enable_sercom_bus_clock(sercom) mclk->MCLK_APBCMASK |= get_sercom_APB_bit(sercom, 1)
+#define disable_sercom_bus_clock(sercom) mclk->MCLK_APBCMASK |= get_sercom_APB_bit(sercom, 0)
 
 
 #endif

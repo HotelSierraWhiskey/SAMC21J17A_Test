@@ -12,22 +12,23 @@
 #include "../samc21j17a.h"
 
 
+extern port_registers_t *port = (port_registers_t *)PORT_BASE_ADDRESS;
+
+
 //  PORT group macros
 #define A 0
 #define B 1
 
-#define PIN(pin)   (1 << pin)
+#define _PIN(pin)   (1 << pin)
 
 //  Basic operation macros
-#define set_pin_as_output(group, pin)   port_register.GROUP[group].PORT_DIRSET |= PIN(pin);
-#define set_pin_as_input(group, pin)    port_register.GROUP[group].PORT_DIRSET &= ~PIN(pin);
-  
-#define set_pin_high(group, pin)        port_register.GROUP[group].PORT_OUTSET |= PIN(pin);
-#define set_pin_low(group, pin)         port_register.GROUP[group].PORT_OUTCLR |= PIN(pin);
+#define set_pin_as_output(group, pin)   port->GROUP[group].PORT_DIRSET |= _PIN(pin)
+#define set_pin_as_input(group, pin)    port->GROUP[group].PORT_DIRSET &= ~_PIN(pin)
 
-#define read_pin(group, pin)            port_register.GROUP[group].PORT_IN & PIN(pin)
+#define pin_high(group, pin)            port->GROUP[group].PORT_OUT |= _PIN(pin)
+#define pin_low(group, pin)             port->GROUP[group].PORT_OUT &= ~_PIN(pin)
 
-port_registers_t port_register;
+#define read_pin(group, pin)            port->GROUP[group].PORT_IN & _PIN(pin)
 
 
 #endif

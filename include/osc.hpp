@@ -12,6 +12,10 @@
 #include "../samc21j17a.h"
 
 
+// Register
+extern oscctrl_registers_t *oscctrl = (oscctrl_registers_t *)OSCCTRL_BASE_ADDRESS;
+
+
 // Frequency Table (SAMC20 Datasheet p.217)
 const extern uint8_t _48MHz =    0b0000;
 const extern uint8_t _24MHz =    0b0001;
@@ -32,12 +36,10 @@ const extern uint8_t _3MHz =     0b1111;
 
 
 //  Basic operation macros
-#define osc48m_enable()         oscctrl_registers.OSCCTRL_OSC48MCTRL |= OSCCTRL_OSC48MCTRL_ENABLE(1)
-#define osc48m_disable()        oscctrl_registers.OSCCTRL_OSC48MCTRL |= OSCCTRL_OSC48MCTRL_ENABLE(0)
-#define osc48m_set_freq(freq)   osctrl_registers.OSCTRL_OSC48MDIV |= freq
+#define osc48m_enable()         oscctrl->OSCCTRL_OSC48MCTRL |= OSCCTRL_OSC48MCTRL_ENABLE(1)
+#define osc48m_disable()        oscctrl->OSCCTRL_OSC48MCTRL |= OSCCTRL_OSC48MCTRL_ENABLE(0)
+#define osc48m_set_freq(freq)   oscctrl->OSCCTRL_OSC48MDIV |= freq
 
-
-oscctrl_registers_t oscctrl_registers;
 
 
 #endif
